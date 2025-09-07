@@ -1,0 +1,1109 @@
+--------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  F:/projects/telepsych/output/summary_fyc_analysis.log
+  log type:  text
+ opened on:   8 Jun 2025, 18:29:15
+
+. 
+. use "F:/projects/telepsych/data/ml_ready/psych_summary_FYC.dta", clear 
+
+. 
+. keep if total_visits != .
+(75,545 observations deleted)
+
+. 
+. *drop unknown ages 3027 --> 3015 obs 
+. drop if age < 0 
+(12 observations deleted)
+
+. svyset VARPSU [pweight = perwt], strata(VARSTR) vce(linearized) singleunit(certainty
+> )
+
+      pweight: perwt
+          VCE: linearized
+  Single unit: certainty
+     Strata 1: VARSTR
+         SU 1: VARPSU
+        FPC 1: <zero>
+
+. 
+. 
+. *make variable labels
+. 
+. label define insurance_lbl 1 "private" 2 "medicaid" 3 "medicare" 4 "medicare advanta
+> ge" 5 "uninsured 1 month" 6 "other"
+
+. label define sex_lbl 1 "female" 2 "male" 
+
+. label define poverty_lbl 1 "<100% FPL" 2 "100%-200% FPL" 3 "200%-400% FPL" 4 ">400% 
+> FPL"
+
+. label define region_lbl 1 "Northeast" 2 "Midwest" 3 "South" 4 "West"
+
+. label define race_lbl 1 "White" 2 "Black" 3 "Hispanic" 4 "Other"
+
+. label define edu_lbl 1 "<HS" 2 "HS Diploma" 3 "Bachelor or more"
+
+. 
+. 
+. label values insurance insurance_lbl
+
+. label values SEX sex_lbl
+
+. label values poverty poverty_lbl
+
+. label values region region_lbl 
+
+. label values edu edu_lbl
+
+. label values race race_lbl
+
+. 
+. recode age (0/18 = 1 "0-18") (19/36 = 2 "19-36") (37/55 = 3 "37-55") (56/65 = 4 "56-
+> 65") (66/80 = 5 "66-80") (81/max = 6 "80+"), gen(age_cat)
+(3015 differences between age and age_cat)
+
+. 
+. gen telemed = 0
+
+. replace telemed = 1 if total_telehealth_visits > 0
+(1,272 real changes made)
+
+. 
+. gen age2 = age * age 
+
+. 
+. global id_vars "age age2 i.year i.SEX i.race i.edu i.region i.poverty i.insurance ch
+> arlson_score autism_dx intellectual_dx personality_dx manic_episode_dx bipolar_disor
+> der_dx depressive_episode_dx mdd_dx persistent_mood_disorder_dx adhd_dx eating_disor
+> der_dx schizophrenia_dx stress_adjstment_dx ocd_dx alcohol_dx opioid_dx cannabis_dx 
+> cocaine_dx other_stimulant_dx"
+
+. 
+. 
+. *autism_dx intellectual_dx personality_dx manic_episode_dx bipolar_disorder_dx mdd_d
+> x persistent_mood_disorder_dx adhd_dx
+. 
+. *svy: mean i.SEX i.race i.insurance i.edu i.region i.poverty charlson_score 
+. 
+. svy: mean  total_visits total_telehealth_visits oop total_spend age_cat $id_vars 
+(running mean on estimation sample)
+
+Survey: Mean estimation
+
+Number of strata =     105                      Number of obs   =       2,990
+Number of PSUs   =     331                      Population size =  37,088,068
+                                                Design df       =         226
+
+-----------------------------------------------------------------------------
+                            |             Linearized
+                            |       Mean   Std. Err.     [95% Conf. Interval]
+----------------------------+------------------------------------------------
+               total_visits |   5.632693   .2200722      5.199037    6.066349
+    total_telehealth_visits |   1.952262     .15524      1.646359    2.258165
+                        oop |    309.804   78.20426      155.7013    463.9068
+                total_spend |   1446.217   140.2404      1169.871    1722.563
+                    age_cat |   2.764197   .0385605      2.688213    2.840181
+                        age |   40.25571   .6121367      39.04948    41.46194
+                       age2 |   2006.091   50.89706      1905.797    2106.384
+                            |
+                       year |
+                      2020  |    .323521   .0102182      .3033859    .3436561
+                      2021  |   .3374158   .0090987      .3194867    .3553448
+                      2022  |   .3390632   .0134132      .3126323    .3654942
+                            |
+                        SEX |
+                    female  |   .4158329   .0127781      .3906534    .4410123
+                      male  |   .5841671   .0127781      .5589877    .6093466
+                            |
+                       race |
+                     White  |   .8075877   .0119422      .7840555    .8311199
+                     Black  |   .1082708   .0087358      .0910567    .1254849
+                  Hispanic  |   .0141554   .0027319      .0087723    .0195386
+                     Other  |   .0699861   .0083842      .0534648    .0865074
+                            |
+                        edu |
+                       <HS  |   .2306464    .013337      .2043657    .2569271
+                HS Diploma  |   .3452246   .0151422      .3153865    .3750626
+          Bachelor or more  |    .424129   .0160601      .3924823    .4557757
+                            |
+                     region |
+                 Northeast  |   .2023505   .0174437      .1679775    .2367235
+                   Midwest  |   .2190711   .0171411      .1852943    .2528478
+                     South  |   .3638687   .0220964      .3203273      .40741
+                      West  |   .2147097   .0163796      .1824336    .2469859
+                            |
+                    poverty |
+                 <100% FPL  |   .2058289   .0119865      .1822093    .2294484
+             100%-200% FPL  |   .1188821   .0097405      .0996883    .1380759
+             200%-400% FPL  |   .2639638   .0115113      .2412806     .286647
+                 >400% FPL  |   .4113252   .0164855      .3788403    .4438102
+                            |
+                  insurance |
+                   private  |   .4499524   .0162246      .4179817    .4819232
+                  medicaid  |    .229509   .0141347      .2016563    .2573618
+                  medicare  |    .036277   .0044988       .027412     .045142
+        medicare advantage  |   .1761143   .0104627      .1554973    .1967313
+         uninsured 1 month  |   .0863994   .0077105      .0712056    .1015932
+                     other  |   .0217479    .004015      .0138363    .0296595
+                            |
+             charlson_score |   .4153379   .0203566      .3752249    .4554508
+                  autism_dx |   .0261759   .0040779      .0181402    .0342115
+            intellectual_dx |          0  (omitted)
+             personality_dx |          0  (omitted)
+           manic_episode_dx |          0  (omitted)
+        bipolar_disorder_dx |   .1358063    .008451      .1191535    .1524591
+      depressive_episode_dx |   .4850866    .015289      .4549594    .5152139
+                     mdd_dx |          0  (omitted)
+persistent_mood_disorder_dx |   .0101482   .0024373      .0053453     .014951
+                    adhd_dx |   .2524625   .0124872      .2278563    .2770686
+         eating_disorder_dx |          0  (omitted)
+           schizophrenia_dx |   .0335011   .0039318      .0257533    .0412488
+        stress_adjstment_dx |    .134791    .010011      .1150642    .1545179
+                     ocd_dx |   .0295664   .0045309      .0206382    .0384946
+                 alcohol_dx |   .0128084   .0029286      .0070376    .0185792
+                  opioid_dx |   .0013225   .0005788      .0001819     .002463
+                cannabis_dx |          0  (omitted)
+                 cocaine_dx |          0  (omitted)
+         other_stimulant_dx |          0  (omitted)
+-----------------------------------------------------------------------------
+
+.  
+. svy: logit telemed i.age_cat i.year i.SEX i.race i.edu i.region i.poverty i.insuranc
+> e charlson_score autism_dx intellectual_dx personality_dx manic_episode_dx bipolar_d
+> isorder_dx mdd_dx persistent_mood_disorder_dx adhd_dx, or
+(running logit on estimation sample)
+
+note: intellectual_dx omitted because of collinearity
+note: personality_dx omitted because of collinearity
+note: manic_episode_dx omitted because of collinearity
+note: mdd_dx omitted because of collinearity
+
+Survey: Logistic regression
+
+Number of strata   =       105                 Number of obs     =       2,990
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Design df         =         226
+                                               F(  29,    198)   =        8.69
+                                               Prob > F          =      0.0000
+
+-------------------------------------------------------------------------------------
+                    |             Linearized
+            telemed | Odds Ratio   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+            age_cat |
+             19-36  |   1.581536   .3842013     1.89   0.060     .9799049    2.552549
+             37-55  |   1.550358    .397209     1.71   0.088     .9357852     2.56855
+             56-65  |    1.90239   .5186569     2.36   0.019     1.111689    3.255486
+             66-80  |   1.310484   .3882183     0.91   0.362      .730994     2.34936
+               80+  |   .6837109   .3974606    -0.65   0.514     .2174607    2.149633
+                    |
+               year |
+              2021  |    3.54252   .3727164    12.02   0.000      2.87921    4.358643
+              2022  |   2.484368    .332653     6.80   0.000     1.908216    3.234477
+                    |
+                SEX |
+              male  |    1.17719   .1294933     1.48   0.139      .947782    1.462125
+                    |
+               race |
+             Black  |   1.080713   .2302791     0.36   0.716     .7101648    1.644604
+          Hispanic  |   1.655944   .7161236     1.17   0.245     .7062465    3.882711
+             Other  |   .9387992   .2300958    -0.26   0.797     .5791933    1.521675
+                    |
+                edu |
+        HS Diploma  |   .8406996   .1543314    -0.95   0.346      .585518    1.207095
+  Bachelor or more  |   1.277204   .2490042     1.25   0.211     .8697932    1.875445
+                    |
+             region |
+           Midwest  |   .8105772   .1418859    -1.20   0.231     .5741102    1.144441
+             South  |   .4274457   .0691829    -5.25   0.000     .3107211    .5880188
+              West  |   .8805015   .1586695    -0.71   0.481     .6173262    1.255872
+                    |
+            poverty |
+     100%-200% FPL  |    1.06781   .1921541     0.36   0.716     .7490215    1.522277
+     200%-400% FPL  |   1.104333   .1777031     0.62   0.538     .8042517     1.51638
+         >400% FPL  |   1.443055    .229213     2.31   0.022      1.05524    1.973397
+                    |
+          insurance |
+          medicaid  |   .7441797   .1171129    -1.88   0.062     .5457598    1.014738
+          medicare  |   1.635033    .539117     1.49   0.137     .8537878    3.131144
+medicare advantage  |   1.191301   .2467147     0.85   0.399     .7921209    1.791645
+ uninsured 1 month  |   1.275306   .2490269     1.25   0.214     .8679745    1.873795
+             other  |   1.352902   .3894741     1.05   0.295     .7671896    2.385778
+                    |
+     charlson_score |   .8733295   .0606098    -1.95   0.052     .7617035    1.001314
+          autism_dx |   1.597851   .5994775     1.25   0.213     .7628961    3.346626
+    intellectual_dx |          1  (omitted)
+     personality_dx |          1  (omitted)
+   manic_episode_dx |          1  (omitted)
+bipolar_disorder_dx |   1.039684   .1614495     0.25   0.802     .7656128    1.411867
+             mdd_dx |          1  (omitted)
+persistent_mood_d~x |   1.065568   .4823568     0.14   0.889      .436705    2.600004
+            adhd_dx |   1.220261   .1605662     1.51   0.132     .9415553    1.581466
+              _cons |   .2385201   .0630769    -5.42   0.000     .1416484     .401641
+-------------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+. 
+. svy: logit telemed $id_vars , or
+(running logit on estimation sample)
+
+note: intellectual_dx omitted because of collinearity
+note: personality_dx omitted because of collinearity
+note: manic_episode_dx omitted because of collinearity
+note: mdd_dx omitted because of collinearity
+note: eating_disorder_dx omitted because of collinearity
+note: cannabis_dx omitted because of collinearity
+note: cocaine_dx omitted because of collinearity
+note: other_stimulant_dx omitted because of collinearity
+
+Survey: Logistic regression
+
+Number of strata   =       105                 Number of obs     =       2,990
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Design df         =         226
+                                               F(  32,    195)   =        7.86
+                                               Prob > F          =      0.0000
+
+-------------------------------------------------------------------------------------
+                    |             Linearized
+            telemed | Odds Ratio   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+                age |   1.036952   .0179634     2.09   0.037     1.002152     1.07296
+               age2 |   .9995986   .0001993    -2.01   0.045     .9992061    .9999914
+                    |
+               year |
+              2021  |   3.537329   .3740599    11.95   0.000     2.871966     4.35684
+              2022  |   2.458603   .3328694     6.64   0.000     1.882886    3.210353
+                    |
+                SEX |
+              male  |   1.121019   .1254706     1.02   0.309     .8991428    1.397645
+                    |
+               race |
+             Black  |   1.134751   .2312087     0.62   0.536     .7595077    1.695388
+          Hispanic  |   1.639818   .7207283     1.13   0.262     .6897058     3.89877
+             Other  |   .9467477   .2254504    -0.23   0.818     .5921683    1.513643
+                    |
+                edu |
+        HS Diploma  |   .8315237   .1552138    -0.99   0.324     .5756152    1.201205
+  Bachelor or more  |   1.247408   .2538186     1.09   0.278      .835365    1.862691
+                    |
+             region |
+           Midwest  |   .8051603   .1431374    -1.22   0.224     .5672117     1.14293
+             South  |   .4190946    .067726    -5.38   0.000     .3048011    .5762455
+              West  |   .8703131   .1583736    -0.76   0.446     .6080591    1.245677
+                    |
+            poverty |
+     100%-200% FPL  |   1.071116   .1918557     0.38   0.702     .7525759    1.524483
+     200%-400% FPL  |   1.154623   .1820314     0.91   0.363     .8462955    1.575282
+         >400% FPL  |   1.521099   .2397432     2.66   0.008     1.115002    2.075101
+                    |
+          insurance |
+          medicaid  |   .7557825   .1210366    -1.75   0.082     .5512457    1.036211
+          medicare  |   1.676723   .5713971     1.52   0.131     .8566937    3.281688
+medicare advantage  |   1.216546   .2530157     0.94   0.347     .8075018    1.832793
+ uninsured 1 month  |   1.339816   .2623227     1.49   0.137     .9109427    1.970604
+             other  |   1.366206   .3880908     1.10   0.273     .7805813    2.391191
+                    |
+     charlson_score |   .8692423   .0623979    -1.95   0.052     .7545864     1.00132
+          autism_dx |   1.602895   .6233086     1.21   0.226     .7449395    3.448967
+    intellectual_dx |          1  (omitted)
+     personality_dx |          1  (omitted)
+   manic_episode_dx |          1  (omitted)
+bipolar_disorder_dx |    1.02469   .1620524     0.15   0.878     .7503294    1.399371
+depressive_episod~x |   1.380608   .1606952     2.77   0.006     1.097645    1.736517
+             mdd_dx |          1  (omitted)
+persistent_mood_d~x |   1.045307   .4687637     0.10   0.921     .4319868    2.529396
+            adhd_dx |   1.226421    .163751     1.53   0.128     .9427047    1.595524
+ eating_disorder_dx |          1  (omitted)
+   schizophrenia_dx |   1.015381   .2662748     0.06   0.954     .6056294    1.702358
+stress_adjstment_dx |   1.132935   .1647401     0.86   0.392     .8506784    1.508845
+             ocd_dx |   1.834506   .5948089     1.87   0.063     .9683778    3.475308
+         alcohol_dx |   1.323903    .611965     0.61   0.544     .5324462    3.291824
+          opioid_dx |   .7988255   .8394497    -0.21   0.831     .1007272    6.335152
+        cannabis_dx |          1  (omitted)
+         cocaine_dx |          1  (omitted)
+ other_stimulant_dx |          1  (omitted)
+              _cons |   .1490232   .0547036    -5.19   0.000     .0722956    .3071824
+-------------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+. 
+. svy: twopm tele_oop $id_vars ,  f(probit) s(glm, link(log) family(gamma))
+(running twopm on estimation sample)
+
+Survey data analysis
+
+Number of strata   =       105                 Number of obs     =       2,984
+Number of PSUs     =       331                 Population size   =  37,039,021
+                                               Design df         =         226
+                                               F(  31,    196)   =       11.35
+                                               Prob > F          =      0.0000
+
+-------------------------------------------------------------------------------------
+                    |             Linearized
+           tele_oop |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+probit              |
+                age |  -.0027986   .0147541    -0.19   0.850    -.0318719    .0262747
+               age2 |   8.18e-06   .0001677     0.05   0.961    -.0003222    .0003386
+                    |
+               year |
+              2021  |   .7904955   .0881927     8.96   0.000     .6167103    .9642806
+              2022  |    .723476   .0994414     7.28   0.000     .5275251    .9194269
+                    |
+                SEX |
+              male  |    .172281   .0848517     2.03   0.043     .0050794    .3394826
+                    |
+               race |
+             Black  |  -.0454769    .147013    -0.31   0.757    -.3351684    .2442147
+          Hispanic  |   .2816985   .3014026     0.93   0.351    -.3122203    .8756173
+             Other  |  -.2677411   .1726455    -1.55   0.122    -.6079418    .0724597
+                    |
+                edu |
+        HS Diploma  |  -.0093238   .1678075    -0.06   0.956    -.3399912    .3213435
+  Bachelor or more  |   .4146272   .1757187     2.36   0.019     .0683707    .7608837
+                    |
+             region |
+           Midwest  |  -.0446562   .1394675    -0.32   0.749    -.3194792    .2301668
+             South  |  -.5284219   .1197305    -4.41   0.000    -.7643527    -.292491
+              West  |  -.1933554   .1358975    -1.42   0.156    -.4611436    .0744329
+                    |
+            poverty |
+     100%-200% FPL  |   .1048794   .1585051     0.66   0.509    -.2074575    .4172163
+     200%-400% FPL  |   .3268146   .1259194     2.60   0.010     .0786884    .5749408
+         >400% FPL  |   .7132564   .1256703     5.68   0.000      .465621    .9608918
+                    |
+          insurance |
+          medicaid  |   -.856654   .1297174    -6.60   0.000    -1.112264   -.6010438
+          medicare  |  -.3261705   .2528426    -1.29   0.198     -.824401      .17206
+medicare advantage  |  -.2567072   .1697914    -1.51   0.132    -.5912839    .0778695
+ uninsured 1 month  |   .2079275   .1295088     1.61   0.110    -.0472717    .4631267
+             other  |    .006216   .2256607     0.03   0.978     -.438452     .450884
+                    |
+     charlson_score |  -.0035198    .054592    -0.06   0.949    -.1110942    .1040545
+          autism_dx |  -.4035336    .310801    -1.30   0.195    -1.015972    .2089049
+    intellectual_dx |          0  (omitted)
+     personality_dx |          0  (omitted)
+   manic_episode_dx |          0  (omitted)
+bipolar_disorder_dx |   .1092227   .1269661     0.86   0.391    -.1409661    .3594116
+depressive_episod~x |   .1945923    .084725     2.30   0.023     .0276404    .3615443
+             mdd_dx |          0  (omitted)
+persistent_mood_d~x |  -.0606696   .3562371    -0.17   0.865    -.7626406    .6413014
+            adhd_dx |   .2947524    .101961     2.89   0.004     .0938367    .4956682
+ eating_disorder_dx |          0  (omitted)
+   schizophrenia_dx |  -.1091142   .2495785    -0.44   0.662    -.6009127    .3826842
+stress_adjstment_dx |  -.0820526   .1163802    -0.71   0.482    -.3113816    .1472763
+             ocd_dx |   .3523902   .1897687     1.86   0.065    -.0215521    .7263326
+         alcohol_dx |   .2524618   .3682229     0.69   0.494    -.4731274    .9780509
+          opioid_dx |          0  (omitted)
+        cannabis_dx |          0  (omitted)
+         cocaine_dx |          0  (omitted)
+ other_stimulant_dx |          0  (omitted)
+              _cons |  -1.808617   .2787981    -6.49   0.000    -2.357993   -1.259241
+--------------------+----------------------------------------------------------------
+glm                 |
+                age |   .0307917   .0308461     1.00   0.319    -.0299911    .0915745
+               age2 |  -.0004864   .0003236    -1.50   0.134    -.0011241    .0001513
+                    |
+               year |
+              2021  |   .3714931   .1795118     2.07   0.040     .0177621     .725224
+              2022  |   .4443517   .2124456     2.09   0.038     .0257242    .8629791
+                    |
+                SEX |
+              male  |   -.187847   .1657945    -1.13   0.258    -.5145477    .1388538
+                    |
+               race |
+             Black  |  -.3536963    .288337    -1.23   0.221     -.921869    .2144764
+          Hispanic  |   .2152137   .5023478     0.43   0.669    -.7746708    1.205098
+             Other  |   .6780957   .5755311     1.18   0.240    -.4559977    1.812189
+                    |
+                edu |
+        HS Diploma  |  -1.000204   .3554517    -2.81   0.005    -1.700627   -.2997807
+  Bachelor or more  |  -.5702964   .3796461    -1.50   0.134    -1.318395    .1778023
+                    |
+             region |
+           Midwest  |  -.3121033   .2357979    -1.32   0.187    -.7767468    .1525402
+             South  |  -.2961887   .2209515    -1.34   0.181    -.7315771    .1391998
+              West  |   .3026148   .2659124     1.14   0.256    -.2213699    .8265995
+                    |
+            poverty |
+     100%-200% FPL  |  -.1766878   .4304038    -0.41   0.682    -1.024806    .6714299
+     200%-400% FPL  |  -.6467304   .3518154    -1.84   0.067    -1.339988    .0465275
+         >400% FPL  |  -.2798486   .3408854    -0.82   0.413    -.9515688    .3918715
+                    |
+          insurance |
+          medicaid  |  -.2650116   .2774434    -0.96   0.341    -.8117182    .2816951
+          medicare  |  -.1499503   .3502954    -0.43   0.669    -.8402131    .5403124
+medicare advantage  |   .2516976   .3047193     0.83   0.410    -.3487567    .8521519
+ uninsured 1 month  |   .3457816   .2767142     1.25   0.213    -.1994882    .8910513
+             other  |  -.7555479   .3616922    -2.09   0.038    -1.468268   -.0428275
+                    |
+     charlson_score |   .1376138   .0968078     1.42   0.157    -.0531475    .3283752
+          autism_dx |   .6172573   .4253522     1.45   0.148    -.2209061    1.455421
+    intellectual_dx |          0  (omitted)
+     personality_dx |          0  (omitted)
+   manic_episode_dx |          0  (omitted)
+bipolar_disorder_dx |   .1521119   .1944077     0.78   0.435    -.2309715    .5351954
+depressive_episod~x |   .3041864   .1548109     1.96   0.051     -.000871    .6092439
+             mdd_dx |          0  (omitted)
+persistent_mood_d~x |   .9282269   .6517661     1.42   0.156    -.3560888    2.212543
+            adhd_dx |  -.1179146   .1687891    -0.70   0.486    -.4505162     .214687
+ eating_disorder_dx |          0  (omitted)
+   schizophrenia_dx |  -1.250714   .4500865    -2.78   0.006    -2.137617   -.3638113
+stress_adjstment_dx |  -.2662024   .2263013    -1.18   0.241    -.7121328    .1797279
+             ocd_dx |   2.359473   .5865534     4.02   0.000      1.20366    3.515286
+         alcohol_dx |  -.8119114   .3284441    -2.47   0.014    -1.459116    -.164707
+          opioid_dx |          0  (omitted)
+        cannabis_dx |          0  (omitted)
+         cocaine_dx |          0  (omitted)
+ other_stimulant_dx |          0  (omitted)
+              _cons |   6.007916   .6547704     9.18   0.000      4.71768    7.298151
+-------------------------------------------------------------------------------------
+
+. 
+. margins insurance edu poverty race SEX
+
+Predictive margins
+
+Number of strata   =       105                 Number of obs     =       2,980
+Number of PSUs     =       331                 Population size   =  37,039,021
+                                               Subpop. no. obs   =       2,908
+                                               Subpop. size      =           .
+Model VCE    : Linearized                      Design df         =         226
+
+Expression   : twopm combined expected values, predict()
+
+-------------------------------------------------------------------------------------
+                    |            Delta-method
+                    |     Margin   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+          insurance |
+           private  |   131.8063   30.87112     4.27   0.000     70.97425    192.6384
+          medicaid  |   35.36609   14.22794     2.49   0.014     7.329701    63.40248
+          medicare  |   79.95214   33.43798     2.39   0.018     14.06205    145.8422
+medicare advantage  |   129.3551   51.03826     2.53   0.012     28.78342    229.9269
+ uninsured 1 month  |   225.9614   76.84955     2.94   0.004     74.52815    377.3947
+             other  |   62.29562   26.10455     2.39   0.018     10.85618    113.7351
+                    |
+                edu |
+               <HS  |   162.2244   72.06951     2.25   0.025     20.21029    304.2386
+        HS Diploma  |   59.04344   15.46815     3.82   0.000      28.5632    89.52368
+  Bachelor or more  |   139.4928   32.44711     4.30   0.000     75.55528    203.4304
+                    |
+            poverty |
+         <100% FPL  |   91.78057   40.01935     2.29   0.023      12.9218    170.6393
+     100%-200% FPL  |   88.01003   32.91775     2.67   0.008     23.14506     152.875
+     200%-400% FPL  |   71.55417   19.64365     3.64   0.000     32.84603    110.2623
+         >400% FPL  |   152.5459   33.94204     4.49   0.000     85.66257    219.4292
+                    |
+               race |
+             White  |   116.5241   27.05233     4.31   0.000     63.21701    169.8311
+             Black  |   78.26887   30.86864     2.54   0.012     17.44171     139.096
+          Hispanic  |   185.7668   98.20779     1.89   0.060    -7.753273    379.2868
+             Other  |   174.1754   110.2739     1.58   0.116    -43.12121    391.4719
+                    |
+                SEX |
+            female  |   119.7133   33.15964     3.61   0.000     54.37169    185.0549
+              male  |   117.3754   26.47496     4.43   0.000     65.20606    169.5447
+-------------------------------------------------------------------------------------
+
+. margins, dydx( insurance edu poverty race SEX)
+
+Average marginal effects
+
+Number of strata   =       105                 Number of obs     =       2,980
+Number of PSUs     =       331                 Population size   =  37,039,021
+                                               Subpop. no. obs   =       2,908
+                                               Subpop. size      =           .
+Model VCE    : Linearized                      Design df         =         226
+
+Expression   : twopm combined expected values, predict()
+dy/dx w.r.t. : 2.SEX 2.race 3.race 4.race 2.edu 3.edu 2.poverty 3.poverty 4.poverty
+               2.insurance 3.insurance 4.insurance 5.insurance 6.insurance
+
+-------------------------------------------------------------------------------------
+                    |            Delta-method
+                    |      dy/dx   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+                SEX |
+              male  |  -2.337897   22.34831    -0.10   0.917     -46.3756    41.69981
+                    |
+               race |
+             Black  |   -38.2552   28.09184    -1.36   0.175    -93.61063    17.10022
+          Hispanic  |    69.2427   92.48881     0.75   0.455     -113.008    251.4934
+             Other  |    57.6513   104.8047     0.55   0.583    -148.8681    264.1707
+                    |
+                edu |
+        HS Diploma  |   -103.181   66.35433    -1.56   0.121    -233.9333    27.57129
+  Bachelor or more  |   -22.7316    66.8461    -0.34   0.734    -154.4529    108.9897
+                    |
+            poverty |
+     100%-200% FPL  |   -3.77054   40.45591    -0.09   0.926    -83.48956    75.94848
+     200%-400% FPL  |   -20.2264   34.97076    -0.58   0.564    -89.13685    48.68405
+         >400% FPL  |   60.76534   37.02872     1.64   0.102    -12.20036     133.731
+                    |
+          insurance |
+          medicaid  |  -96.44021   28.61871    -3.37   0.001    -152.8339   -40.04657
+          medicare  |  -51.85416   33.44817    -1.55   0.122    -117.7643      14.056
+medicare advantage  |  -2.451158   47.98585    -0.05   0.959    -97.00806    92.10575
+ uninsured 1 month  |   94.15514   63.87791     1.47   0.142    -31.71733    220.0276
+             other  |  -69.51068   31.40211    -2.21   0.028     -131.389   -7.632321
+-------------------------------------------------------------------------------------
+Note: dy/dx for factor levels is the discrete change from the base level.
+
+. 
+. svy: twopm tele_total_spend $id_vars ,  f(probit) s(glm, link(log) family(gamma))
+(running twopm on estimation sample)
+
+Survey data analysis
+
+Number of strata   =       105                 Number of obs     =       2,990
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Design df         =         226
+                                               F(  32,    195)   =        8.44
+                                               Prob > F          =      0.0000
+
+-------------------------------------------------------------------------------------
+                    |             Linearized
+   tele_total_spend |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+probit              |
+                age |   .0205525   .0104099     1.97   0.050     .0000397    .0410654
+               age2 |  -.0002199   .0001201    -1.83   0.068    -.0004565    .0000167
+                    |
+               year |
+              2021  |   .7574537   .0634295    11.94   0.000     .6324648    .8824427
+              2022  |   .5214747    .081924     6.37   0.000      .360042    .6829073
+                    |
+                SEX |
+              male  |   .0641981   .0678181     0.95   0.345    -.0694385    .1978348
+                    |
+               race |
+             Black  |   .0886353   .1225755     0.72   0.470    -.1529017    .3301724
+          Hispanic  |   .3077636   .2614699     1.18   0.240    -.2074669    .8229942
+             Other  |  -.0223311   .1468385    -0.15   0.879    -.3116788    .2670166
+                    |
+                edu |
+        HS Diploma  |  -.1095077   .1130045    -0.97   0.334    -.3321849    .1131695
+  Bachelor or more  |   .1410078   .1233182     1.14   0.254    -.1019927    .3840083
+                    |
+             region |
+           Midwest  |  -.1332989   .1084352    -1.23   0.220    -.3469722    .0803743
+             South  |   -.539871   .0975038    -5.54   0.000    -.7320039   -.3477381
+              West  |  -.0965234   .1114093    -0.87   0.387    -.3160572    .1230104
+                    |
+            poverty |
+     100%-200% FPL  |   .0501795   .1062735     0.47   0.637    -.1592342    .2595933
+     200%-400% FPL  |   .0672279   .0945991     0.71   0.478    -.1191812    .2536369
+         >400% FPL  |   .2544634   .0959229     2.65   0.009     .0654458    .4434809
+                    |
+          insurance |
+          medicaid  |  -.1573856   .0959182    -1.64   0.102     -.346394    .0316228
+          medicare  |   .2878579   .2093583     1.37   0.171    -.1246859    .7004018
+medicare advantage  |   .0708417   .1253938     0.56   0.573    -.1762489    .3179322
+ uninsured 1 month  |   .1732538   .1194006     1.45   0.148    -.0620271    .4085346
+             other  |    .191739   .1729466     1.11   0.269     -.149055    .5325331
+                    |
+     charlson_score |  -.0808992   .0438427    -1.85   0.066     -.167292    .0054936
+          autism_dx |   .2942963   .2326275     1.27   0.207    -.1641001    .7526926
+    intellectual_dx |          0  (omitted)
+     personality_dx |          0  (omitted)
+   manic_episode_dx |          0  (omitted)
+bipolar_disorder_dx |    .029633   .0948046     0.31   0.755    -.1571809    .2164469
+depressive_episod~x |   .1957782    .070951     2.76   0.006     .0559681    .3355882
+             mdd_dx |          0  (omitted)
+persistent_mood_d~x |   .0154055   .2688734     0.06   0.954    -.5144139    .5452249
+            adhd_dx |     .13146   .0811152     1.62   0.106    -.0283788    .2912989
+ eating_disorder_dx |          0  (omitted)
+   schizophrenia_dx |   .0113125   .1594359     0.07   0.943    -.3028585    .3254834
+stress_adjstment_dx |   .0383126   .0894036     0.43   0.669    -.1378586    .2144839
+             ocd_dx |   .3033351   .1868445     1.62   0.106     -.064845    .6715153
+         alcohol_dx |   .1643999   .2806324     0.59   0.559    -.3885907    .7173905
+          opioid_dx |  -.1464976   .5692687    -0.26   0.797    -1.268251    .9752556
+        cannabis_dx |          0  (omitted)
+         cocaine_dx |          0  (omitted)
+ other_stimulant_dx |          0  (omitted)
+              _cons |  -1.120332   .2188234    -5.12   0.000    -1.551527   -.6891369
+--------------------+----------------------------------------------------------------
+glm                 |
+                age |  -.0117398   .0222686    -0.53   0.599    -.0556205    .0321409
+               age2 |   .0000819   .0002562     0.32   0.750     -.000423    .0005868
+                    |
+               year |
+              2021  |   .3287021   .1465148     2.24   0.026     .0399922     .617412
+              2022  |   .5912004   .1738807     3.40   0.001     .2485658    .9338351
+                    |
+                SEX |
+              male  |  -.1127011   .1138278    -0.99   0.323    -.3370007    .1115984
+                    |
+               race |
+             Black  |   .5487408   .1802373     3.04   0.003     .1935802    .9039013
+          Hispanic  |  -.0949142   .2127122    -0.45   0.656    -.5140671    .3242387
+             Other  |  -.0375368   .2733913    -0.14   0.891    -.5762588    .5011853
+                    |
+                edu |
+        HS Diploma  |  -.0917198    .195762    -0.47   0.640     -.477472    .2940324
+  Bachelor or more  |  -.0701149    .220894    -0.32   0.751    -.5053901    .3651604
+                    |
+             region |
+           Midwest  |  -.1308662   .1685074    -0.78   0.438    -.4629128    .2011804
+             South  |  -.4865551   .1442582    -3.37   0.001    -.7708182    -.202292
+              West  |   .1927667   .1630287     1.18   0.238     -.128484    .5140173
+                    |
+            poverty |
+     100%-200% FPL  |   .4858067   .2315189     2.10   0.037     .0295949    .9420184
+     200%-400% FPL  |  -.1002175    .154032    -0.65   0.516      -.40374     .203305
+         >400% FPL  |   .4219015   .1725939     2.44   0.015     .0818025    .7620005
+                    |
+          insurance |
+          medicaid  |  -.0528656   .1750471    -0.30   0.763    -.3977988    .2920677
+          medicare  |  -.3520982   .3177603    -1.11   0.269      -.97825    .2740536
+medicare advantage  |  -.1507675   .2027018    -0.74   0.458    -.5501947    .2486597
+ uninsured 1 month  |  -.1017444   .2127251    -0.48   0.633    -.5209227    .3174339
+             other  |  -.0712609    .315944    -0.23   0.822    -.6938336    .5513119
+                    |
+     charlson_score |   .2178575   .1003964     2.17   0.031     .0200249    .4156902
+          autism_dx |  -.6370033   .2013928    -3.16   0.002    -1.033851   -.2401555
+    intellectual_dx |          0  (omitted)
+     personality_dx |          0  (omitted)
+   manic_episode_dx |          0  (omitted)
+bipolar_disorder_dx |    .298759   .1366446     2.19   0.030     .0294986    .5680194
+depressive_episod~x |   .3966649    .125804     3.15   0.002      .148766    .6445637
+             mdd_dx |          0  (omitted)
+persistent_mood_d~x |  -.5183111   .3273569    -1.58   0.115    -1.163373     .126751
+            adhd_dx |  -.1190123   .1337382    -0.89   0.374    -.3825455     .144521
+ eating_disorder_dx |          0  (omitted)
+   schizophrenia_dx |     -.0515   .2892826    -0.18   0.859     -.621536     .518536
+stress_adjstment_dx |   .2176191   .1387644     1.57   0.118    -.0558184    .4910565
+             ocd_dx |   1.320594   .5113489     2.58   0.010      .312973    2.328216
+         alcohol_dx |  -1.024716   .3204552    -3.20   0.002    -1.656178    -.393254
+          opioid_dx |   .7648597   .3317271     2.31   0.022     .1111861    1.418533
+        cannabis_dx |          0  (omitted)
+         cocaine_dx |          0  (omitted)
+ other_stimulant_dx |          0  (omitted)
+              _cons |   6.489719     .45055    14.40   0.000     5.601903    7.377536
+-------------------------------------------------------------------------------------
+
+. margins insurance edu poverty race
+
+Predictive margins
+
+Number of strata   =       105                 Number of obs     =       2,986
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Subpop. no. obs   =       2,914
+                                               Subpop. size      =           .
+Model VCE    : Linearized                      Design df         =         226
+
+Expression   : twopm combined expected values, predict()
+
+-------------------------------------------------------------------------------------
+                    |            Delta-method
+                    |     Margin   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+          insurance |
+           private  |   508.7692    65.2367     7.80   0.000     380.2192    637.3191
+          medicaid  |   424.6835   79.33138     5.35   0.000     268.3597    581.0073
+          medicare  |   436.6281   137.4075     3.18   0.002     165.8644    707.3917
+medicare advantage  |   461.4096   85.84688     5.37   0.000     292.2469    630.5723
+ uninsured 1 month  |   520.7607   124.7196     4.18   0.000     274.9987    766.5226
+             other  |   543.5841   184.7374     2.94   0.004      179.556    907.6122
+                    |
+                edu |
+               <HS  |   504.0278   107.6706     4.68   0.000     291.8612    716.1945
+        HS Diploma  |    420.688   50.97647     8.25   0.000     320.2381     521.138
+  Bachelor or more  |    521.827   73.07558     7.14   0.000     377.8303    665.8236
+                    |
+            poverty |
+         <100% FPL  |   338.1831    54.3733     6.22   0.000     231.0397    445.3266
+     100%-200% FPL  |   573.4407   138.9927     4.13   0.000     299.5534    847.3281
+     200%-400% FPL  |    323.649   40.65829     7.96   0.000     243.5312    403.7668
+         >400% FPL  |    629.654   77.48359     8.13   0.000     476.9714    782.3367
+                    |
+               race |
+             White  |   455.9295   51.39811     8.87   0.000     354.6487    557.2103
+             Black  |   842.6996   185.0406     4.55   0.000     478.0741    1207.325
+          Hispanic  |   511.5516   127.2951     4.02   0.000     260.7145    762.3887
+             Other  |   431.6535   125.5506     3.44   0.001      184.254    679.0531
+-------------------------------------------------------------------------------------
+
+. margins, dydx( insurance edu poverty race SEX)
+
+Average marginal effects
+
+Number of strata   =       105                 Number of obs     =       2,986
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Subpop. no. obs   =       2,914
+                                               Subpop. size      =           .
+Model VCE    : Linearized                      Design df         =         226
+
+Expression   : twopm combined expected values, predict()
+dy/dx w.r.t. : 2.SEX 2.race 3.race 4.race 2.edu 3.edu 2.poverty 3.poverty 4.poverty
+               2.insurance 3.insurance 4.insurance 5.insurance 6.insurance
+
+-------------------------------------------------------------------------------------
+                    |            Delta-method
+                    |      dy/dx   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+                SEX |
+              male  |   -30.8756   60.26878    -0.51   0.609    -149.6362      87.885
+                    |
+               race |
+             Black  |   386.7701   171.5002     2.26   0.025      48.8262    724.7141
+          Hispanic  |   55.62215   137.5122     0.40   0.686    -215.3479    326.5922
+             Other  |  -24.27594   127.3634    -0.19   0.849    -275.2475    226.6956
+                    |
+                edu |
+        HS Diploma  |   -83.3398   100.9916    -0.83   0.410    -282.3453    115.6657
+  Bachelor or more  |   17.79911   125.1718     0.14   0.887    -228.8539    264.4521
+                    |
+            poverty |
+     100%-200% FPL  |   235.2576   133.2438     1.77   0.079    -27.30139    497.8166
+     200%-400% FPL  |  -14.53411   55.82961    -0.26   0.795    -124.5473    95.47905
+         >400% FPL  |   291.4709    84.2691     3.46   0.001     125.4173    457.5245
+                    |
+          insurance |
+          medicaid  |  -84.08569   87.07679    -0.97   0.335    -255.6719    87.50054
+          medicare  |   -72.1411   151.7552    -0.48   0.635    -371.1772     226.895
+medicare advantage  |  -47.35955   102.4826    -0.46   0.644    -249.3033    154.5842
+ uninsured 1 month  |    11.9915   114.5939     0.10   0.917    -213.8177    237.8007
+             other  |   34.81494   184.1264     0.19   0.850    -328.0091    397.6389
+-------------------------------------------------------------------------------------
+Note: dy/dx for factor levels is the discrete change from the base level.
+
+. 
+. svy: glm tele_oop $id_vars , family(gamma) link(log)
+(running glm on estimation sample)
+convergence not achieved
+
+Survey: Generalized linear models
+
+Number of strata   =       105                 Number of obs     =       2,990
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Design df         =         226
+
+-------------------------------------------------------------------------------------
+                    |             Linearized
+           tele_oop |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+                age |  -.0155559   .0390837    -0.40   0.691     -.092571    .0614591
+               age2 |  -.0001673   .0004341    -0.39   0.700    -.0010227     .000688
+                    |
+               year |
+              2021  |   1.843209   .2738199     6.73   0.000     1.303642    2.382775
+              2022  |   1.492864   .2794927     5.34   0.000     .9421187    2.043608
+                    |
+                SEX |
+              male  |   .5290524   .2528598     2.09   0.038      .030788    1.027317
+                    |
+               race |
+             Black  |  -1.174703    .345597    -3.40   0.001    -1.855708   -.4936986
+          Hispanic  |   .1232114   .5978068     0.21   0.837    -1.054777    1.301199
+             Other  |  -.3369076   .5294429    -0.64   0.525    -1.380183    .7063681
+                    |
+                edu |
+        HS Diploma  |  -.1080715   .4633062    -0.23   0.816    -1.021024    .8048809
+  Bachelor or more  |   1.309523    .461099     2.84   0.005       .40092    2.218126
+                    |
+             region |
+           Midwest  |  -.0515148   .3442325    -0.15   0.881    -.7298304    .6268009
+             South  |  -.8457379   .3003109    -2.82   0.005    -1.437505   -.2539704
+              West  |   .0632872   .3525705     0.18   0.858    -.6314587    .7580331
+                    |
+            poverty |
+     100%-200% FPL  |   .1100645   .4497105     0.24   0.807    -.7760973    .9962264
+     200%-400% FPL  |   .5893432   .3920687     1.50   0.134    -.1832346    1.361921
+         >400% FPL  |   1.148065   .3493555     3.29   0.001     .4596541    1.836476
+                    |
+          insurance |
+          medicaid  |  -2.029032   .4477452    -4.53   0.000    -2.911321   -1.146743
+          medicare  |   .1126441   .6324407     0.18   0.859     -1.13359    1.358879
+medicare advantage  |    .259805   .4913578     0.53   0.597    -.7084236    1.228034
+ uninsured 1 month  |    .022788   .3127547     0.07   0.942    -.5935002    .6390763
+             other  |  -.6590782   .7241295    -0.91   0.364    -2.085987    .7678308
+                    |
+     charlson_score |  -.1675954   .1246888    -1.34   0.180    -.4132966    .0781058
+          autism_dx |  -1.203343   .6325452    -1.90   0.058    -2.449784    .0430974
+    intellectual_dx |          0  (omitted)
+     personality_dx |          0  (omitted)
+   manic_episode_dx |          0  (omitted)
+bipolar_disorder_dx |   .0289372   .3199379     0.09   0.928    -.6015056      .65938
+depressive_episod~x |   .6700074   .2330488     2.87   0.004     .2107811    1.129234
+             mdd_dx |          0  (omitted)
+persistent_mood_d~x |  -.2886573   .9444878    -0.31   0.760    -2.149786    1.572471
+            adhd_dx |    .733492    .262984     2.79   0.006     .2152778    1.251706
+ eating_disorder_dx |          0  (omitted)
+   schizophrenia_dx |  -1.811261    .691601    -2.62   0.009    -3.174072   -.4484503
+stress_adjstment_dx |  -.9764693   .3114291    -3.14   0.002    -1.590145   -.3627933
+             ocd_dx |   2.351998   .6119191     3.84   0.000     1.146201    3.557794
+         alcohol_dx |   .0504414   .5507358     0.09   0.927    -1.034792    1.135675
+          opioid_dx |  -8.74e+15          .        .       .            .           .
+        cannabis_dx |          0  (omitted)
+         cocaine_dx |          0  (omitted)
+ other_stimulant_dx |          0  (omitted)
+              _cons |    2.31869   .8194601     2.83   0.005     .7039308    3.933449
+-------------------------------------------------------------------------------------
+Warning: convergence not achieved
+
+. 
+. margins insurance edu poverty race SEX
+
+Predictive margins
+
+Number of strata   =       105                 Number of obs     =       2,986
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Subpop. no. obs   =       2,914
+                                               Subpop. size      =           .
+Model VCE    : Linearized                      Design df         =         226
+
+Expression   : Predicted mean tele_oop, predict()
+
+-------------------------------------------------------------------------------------
+                    |            Delta-method
+                    |     Margin   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+          insurance |
+           private  |    186.595   46.77347     3.99   0.000     94.42706    278.7628
+          medicaid  |   24.53027   10.76499     2.28   0.024     3.317685    45.74286
+          medicare  |   208.8433   138.5837     1.51   0.133    -64.23819    481.9249
+medicare advantage  |   241.9534    126.105     1.92   0.056    -6.538477    490.4453
+ uninsured 1 month  |   190.8959   64.82713     2.94   0.004       63.153    318.6388
+             other  |    96.5308   70.18065     1.38   0.170    -41.76131    234.8229
+                    |
+                edu |
+               <HS  |   77.33833   30.52959     2.53   0.012     17.17927    137.4974
+        HS Diploma  |   69.41606    20.5025     3.39   0.001     29.01554    109.8166
+  Bachelor or more  |   286.4926   84.24378     3.40   0.001     120.4889    452.4964
+                    |
+            poverty |
+         <100% FPL  |   67.35981   28.75841     2.34   0.020     10.69089    124.0287
+     100%-200% FPL  |   75.19713   34.01631     2.21   0.028     8.167445    142.2268
+     200%-400% FPL  |   121.4365   34.84019     3.49   0.001     52.78337    190.0897
+         >400% FPL  |    212.324   50.63062     4.19   0.000     112.5556    312.0925
+                    |
+               race |
+             White  |   171.6399    39.4015     4.36   0.000     93.99857    249.2812
+             Black  |   53.02139   20.59655     2.57   0.011     12.43556    93.60722
+          Hispanic  |   194.1459   120.2849     1.61   0.108    -42.87755    431.1693
+             Other  |   122.5465   68.32081     1.79   0.074    -12.08073    257.1738
+                    |
+                SEX |
+            female  |   117.7861   29.79521     3.95   0.000      59.0742    176.4981
+              male  |   199.9212   53.97045     3.70   0.000     93.57152    306.2708
+-------------------------------------------------------------------------------------
+
+. margins, dydx( insurance edu poverty race SEX)
+
+Average marginal effects
+
+Number of strata   =       105                 Number of obs     =       2,986
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Subpop. no. obs   =       2,914
+                                               Subpop. size      =           .
+Model VCE    : Linearized                      Design df         =         226
+
+Expression   : Predicted mean tele_oop, predict()
+dy/dx w.r.t. : 2.SEX 2.race 3.race 4.race 2.edu 3.edu 2.poverty 3.poverty 4.poverty
+               2.insurance 3.insurance 4.insurance 5.insurance 6.insurance
+
+-------------------------------------------------------------------------------------
+                    |            Delta-method
+                    |      dy/dx   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+                SEX |
+              male  |   82.13501   45.64262     1.80   0.073    -7.804503    172.0745
+                    |
+               race |
+             Black  |  -118.6185   34.79653    -3.41   0.001    -187.1856   -50.05136
+          Hispanic  |   22.50602   115.6826     0.19   0.846    -205.4485    250.4605
+             Other  |  -49.09333   66.85887    -0.73   0.464    -180.8398    82.65315
+                    |
+                edu |
+        HS Diploma  |  -7.922271   34.63914    -0.23   0.819    -76.17926    60.33472
+  Bachelor or more  |   209.1543   85.85655     2.44   0.016     39.97259    378.3361
+                    |
+            poverty |
+     100%-200% FPL  |   7.837322   32.38469     0.24   0.809    -55.97723    71.65188
+     200%-400% FPL  |   54.07672   33.67462     1.61   0.110    -12.27967    120.4331
+         >400% FPL  |   144.9642   41.42328     3.50   0.001     63.33897    226.5894
+                    |
+          insurance |
+          medicaid  |  -162.0647   45.30068    -3.58   0.000    -251.3304   -72.79895
+          medicare  |   22.24838    131.803     0.17   0.866    -237.4717    281.9684
+medicare advantage  |   55.35847   117.8534     0.47   0.639    -176.8735    287.5905
+ uninsured 1 month  |   4.300953    59.4009     0.07   0.942    -112.7495    121.3514
+             other  |  -90.06416   76.84735    -1.17   0.242    -241.4931     61.3648
+-------------------------------------------------------------------------------------
+Note: dy/dx for factor levels is the discrete change from the base level.
+
+. 
+. 
+. svy: glm tele_total_spend $id_vars , family(gamma) link(log)
+(running glm on estimation sample)
+
+Survey: Generalized linear models
+
+Number of strata   =       105                 Number of obs     =       2,990
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Design df         =         226
+
+-------------------------------------------------------------------------------------
+                    |             Linearized
+   tele_total_spend |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+                age |    .010814   .0222506     0.49   0.627    -.0330311    .0546591
+               age2 |  -.0001614   .0002568    -0.63   0.530    -.0006674    .0003446
+                    |
+               year |
+              2021  |   1.075873   .1450323     7.42   0.000     .7900842    1.361661
+              2022  |   1.105951   .1788495     6.18   0.000      .753525    1.458377
+                    |
+                SEX |
+              male  |  -.0499555   .1310772    -0.38   0.703    -.3082453    .2083343
+                    |
+               race |
+             Black  |   .4722298   .1938986     2.44   0.016     .0901494    .8543103
+          Hispanic  |   .2938135    .324541     0.91   0.366    -.3456999    .9333269
+             Other  |   -.169546   .3062058    -0.55   0.580    -.7729294    .4338375
+                    |
+                edu |
+        HS Diploma  |  -.1946224   .2199327    -0.88   0.377    -.6280035    .2387586
+  Bachelor or more  |   .0282945   .2617096     0.11   0.914    -.4874086    .5439975
+                    |
+             region |
+           Midwest  |  -.1537741   .2120954    -0.73   0.469    -.5717115    .2641633
+             South  |   -.964264   .1662902    -5.80   0.000    -1.291941   -.6365865
+              West  |    .095289   .1895857     0.50   0.616    -.2782928    .4688708
+                    |
+            poverty |
+     100%-200% FPL  |   .5749712   .2688438     2.14   0.034     .0452102    1.104732
+     200%-400% FPL  |  -.0171711   .1776353    -0.10   0.923    -.3672044    .3328621
+         >400% FPL  |   .6593785   .1908515     3.45   0.001     .2833025    1.035455
+                    |
+          insurance |
+          medicaid  |   -.078083   .2082125    -0.38   0.708    -.4883692    .3322032
+          medicare  |  -.1864885   .3467685    -0.54   0.591    -.8698014    .4968244
+medicare advantage  |   .0065248   .2657494     0.02   0.980    -.5171387    .5301883
+ uninsured 1 month  |  -.0593514   .2201833    -0.27   0.788    -.4932262    .3745235
+             other  |   .0222286   .3595659     0.06   0.951     -.686302    .7307591
+                    |
+     charlson_score |   .1133726   .1107619     1.02   0.307    -.1048855    .3316306
+          autism_dx |  -.4078344   .3025814    -1.35   0.179    -1.004076    .1884071
+    intellectual_dx |          0  (omitted)
+     personality_dx |          0  (omitted)
+   manic_episode_dx |          0  (omitted)
+bipolar_disorder_dx |   .3304169   .1701727     1.94   0.053    -.0049112     .665745
+depressive_episod~x |   .5520561   .1411257     3.91   0.000     .2739656    .8301465
+             mdd_dx |          0  (omitted)
+persistent_mood_d~x |  -.7580605   .4180062    -1.81   0.071    -1.581749    .0656276
+            adhd_dx |   .0624839   .1624026     0.38   0.701     -.257533    .3825008
+ eating_disorder_dx |          0  (omitted)
+   schizophrenia_dx |  -.2318372   .3340189    -0.69   0.488    -.8900269    .4263526
+stress_adjstment_dx |   .2593965   .1668556     1.55   0.121    -.0693953    .5881882
+             ocd_dx |   1.343295   .4672916     2.87   0.004     .4224891    2.264101
+         alcohol_dx |  -.6925745   .4111961    -1.68   0.094    -1.502843    .1176941
+          opioid_dx |  -.0311616   .8363311    -0.04   0.970    -1.679166    1.616842
+        cannabis_dx |          0  (omitted)
+         cocaine_dx |          0  (omitted)
+ other_stimulant_dx |          0  (omitted)
+              _cons |   4.605515   .4722517     9.75   0.000     3.674935    5.536095
+-------------------------------------------------------------------------------------
+
+. 
+. margins insurance edu poverty race SEX
+
+Predictive margins
+
+Number of strata   =       105                 Number of obs     =       2,986
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Subpop. no. obs   =       2,914
+                                               Subpop. size      =           .
+Model VCE    : Linearized                      Design df         =         226
+
+Expression   : Predicted mean tele_total_spend, predict()
+
+-------------------------------------------------------------------------------------
+                    |            Delta-method
+                    |     Margin   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+          insurance |
+           private  |   484.7813   62.60404     7.74   0.000      361.419    608.1436
+          medicaid  |   448.3682    87.4126     5.13   0.000     276.1203    620.6162
+          medicare  |   402.3045   126.7542     3.17   0.002     152.5334    652.0757
+medicare advantage  |   487.9547   106.5996     4.58   0.000     277.8984    698.0111
+ uninsured 1 month  |   456.8461   103.7539     4.40   0.000     252.3974    661.2947
+             other  |    495.678   177.6156     2.79   0.006     145.6835    845.6724
+                    |
+                edu |
+               <HS  |   496.9564   110.6003     4.49   0.000     279.0168     714.896
+        HS Diploma  |   409.0674   50.77948     8.06   0.000     309.0056    509.1291
+  Bachelor or more  |   511.2183   69.99453     7.30   0.000     373.2929    649.1437
+                    |
+            poverty |
+         <100% FPL  |   320.6274   51.70482     6.20   0.000     218.7422    422.5126
+     100%-200% FPL  |   569.7803   143.0287     3.98   0.000     287.9401    851.6206
+     200%-400% FPL  |   315.1689   39.38284     8.00   0.000     237.5643    392.7734
+         >400% FPL  |    619.962   75.13628     8.25   0.000     471.9047    768.0193
+                    |
+               race |
+             White  |   456.4691   49.22063     9.27   0.000     359.4791    553.4592
+             Black  |   731.9783   151.0886     4.84   0.000     434.2559    1029.701
+          Hispanic  |   612.3687   185.7271     3.30   0.001     246.3904     978.347
+             Other  |   385.2818   114.9728     3.35   0.001      158.726    611.8377
+                    |
+                SEX |
+            female  |   487.4874   65.11562     7.49   0.000      359.176    615.7988
+              male  |    463.733   50.43394     9.19   0.000     364.3521    563.1139
+-------------------------------------------------------------------------------------
+
+. margins, dydx( insurance edu poverty race SEX)
+
+Average marginal effects
+
+Number of strata   =       105                 Number of obs     =       2,986
+Number of PSUs     =       331                 Population size   =  37,088,068
+                                               Subpop. no. obs   =       2,914
+                                               Subpop. size      =           .
+Model VCE    : Linearized                      Design df         =         226
+
+Expression   : Predicted mean tele_total_spend, predict()
+dy/dx w.r.t. : 2.SEX 2.race 3.race 4.race 2.edu 3.edu 2.poverty 3.poverty 4.poverty
+               2.insurance 3.insurance 4.insurance 5.insurance 6.insurance
+
+-------------------------------------------------------------------------------------
+                    |            Delta-method
+                    |      dy/dx   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------------+----------------------------------------------------------------
+                SEX |
+              male  |  -23.75441   62.93152    -0.38   0.706     -147.762    100.2532
+                    |
+               race |
+             Black  |   275.5092   140.3278     1.96   0.051    -1.009094    552.0275
+          Hispanic  |   155.8996   193.3807     0.81   0.421    -225.1603    536.9595
+             Other  |   -71.1873   120.1053    -0.59   0.554    -307.8567    165.4821
+                    |
+                edu |
+        HS Diploma  |  -87.88902   106.9697    -0.82   0.412    -298.6745    122.8964
+  Bachelor or more  |   14.26194   131.0962     0.11   0.913    -244.0653    272.5892
+                    |
+            poverty |
+     100%-200% FPL  |   249.1529   141.6762     1.76   0.080    -30.02231    528.3282
+     200%-400% FPL  |  -5.458541   56.63275    -0.10   0.923    -117.0543    106.1372
+         >400% FPL  |   299.3346   86.43055     3.46   0.001     129.0218    469.6474
+                    |
+          insurance |
+          medicaid  |  -36.41307   95.37798    -0.38   0.703    -224.3569    151.5308
+          medicare  |  -82.47677   144.3086    -0.57   0.568    -366.8392    201.8856
+medicare advantage  |   3.173421   129.4378     0.02   0.980    -251.8859    258.2328
+ uninsured 1 month  |  -27.93524   101.5118    -0.28   0.783    -227.9658    172.0953
+             other  |   10.89666   177.9681     0.06   0.951    -339.7924    361.5857
+-------------------------------------------------------------------------------------
+Note: dy/dx for factor levels is the discrete change from the base level.
+
+. 
+. log close 
+      name:  <unnamed>
+       log:  F:/projects/telepsych/output/summary_fyc_analysis.log
+  log type:  text
+ closed on:   8 Jun 2025, 18:33:08
+--------------------------------------------------------------------------------------
