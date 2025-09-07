@@ -79,11 +79,11 @@ summary(psych_visits$sf)
 summary(psych_visits$xp)
 
 psych_visits <- psych_visits %>% 
-  mutate(sf = case_when(year == 2021 ~ sf * 0.97582,
-                                       year == 2020 ~ sf * 0.956494,
+  mutate(sf = case_when(year == 2021 ~ sf * 1.040508228,
+                                       year == 2020 ~ sf *  1.053342224,
                         TRUE ~ sf),
-         xp = case_when(year == 2021 ~ xp * 0.97582,
-                                       year == 2020 ~ xp * 0.956494,
+         xp = case_when(year == 2021 ~ xp * 1.040508228,
+                                       year == 2020 ~ xp *  1.053342224,
                         TRUE ~ xp))
 
 summary(psych_visits$sf)
